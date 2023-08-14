@@ -1,0 +1,10 @@
+{{template "meta.tmpl"}}
+
+{{ define "body"}}
+<div class="flex justify-center content-center">
+    <div>
+        center
+        {{ block "center" .}}defult center{{end}}
+    </div>
+</div>
+{{end}}

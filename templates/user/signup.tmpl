@@ -1,0 +1,19 @@
+{{template "meta.tmpl"}}
+<div>
+    <p>Signup</p>
+</div>
+<div>
+    <form method="post" autocomplete="on">
+        {{ template "username_field.tmpl"}}
+        {{ template "email_field.tmpl"}}
+        {{template "password_field.tmpl"}}
+        <input type="submit">
+
+    </form>
+    {{.error}}
+    {{ if .reset_password }}
+    {{end}}
+</div>
+<div>
+    <a href="/login">Login</a>
+</div>
