@@ -22,22 +22,30 @@ var (
 	verifier = emailverifier.NewVerifier().EnableSMTPCheck()
 )
 
-func get_cookies(c *gin.Context) (string, string) {
+func get_cookies(c *gin.Context) (string, uint) {
 	cookie, err := c.Cookie("user_token")
 	if err != nil {
 		cookie = ""
 	}
 
-	username, err := c.Cookie("username")
-	if err != nil {
-		username = ""
+	uint_id := uint64(0)
+	id, err := c.Cookie("id")
+	if err == nil {
+		uint_id, err = strconv.ParseUint(id, 10, 32)
+		base.CheckErr(err)
 	}
-	return cookie, username
+
+	return cookie, uint(uint_id)
 }
 func Index(c *gin.Context) {
-	cookie, username := get_cookies(c)
-	logged_in, _, _ := check_login(c, cookie, username)
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{"logged_in": logged_in})
+	cookie, id := get_cookies(c)
+	logged_in, _, _ := check_login(c, cookie, id)
+	var user database.User
+	if logged_in {
+		db := database.OpenDB()
+		db.Find(&user, "id = ?", id)
+	}
+	c.HTML(http.StatusOK, "index.tmpl", gin.H{"logged_in": logged_in, "username": user.Username})
 }
 
 func Redirect_user(token string, expire_seconds string, c *gin.Context) {
@@ -99,7 +107,7 @@ func Login_form(c *gin.Context) {
 
 	}
 	if base.CheckPasswordHash(password, user.Password) {
-		login_user(c, user.Username)
+		login_user(c, user.Id)
 
 	} else {
 		c.HTML(http.StatusOK, "login.tmpl", gin.H{
@@ -110,7 +118,7 @@ func Login_form(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	c.SetCookie("user_token", "", -1, "/", os.Getenv("DOMAIN"), true, true)
+	c.SetCookie("id", "", -1, "/", os.Getenv("DOMAIN"), true, true)
 	c.SetCookie("username", "", -1, "/", os.Getenv("DOMAIN"), true, true)
 	c.Redirect(http.StatusFound, "/")
 }
@@ -172,26 +180,28 @@ func Signup_form(c *gin.Context) {
 	hased_password := base.HashPassword(password)
 
 	db.Create(&database.User{Username: username, Email: email, Password: hased_password})
-	login_user(c, username)
+	db.Find(&user, "username = ?", username)
+
+	login_user(c, user.Id)
 }
 
-func login_user(c *gin.Context, username string) {
+func login_user(c *gin.Context, id uint) {
 	db := database.OpenDB()
 	generated_token := base.GenerateSecureToken(32)
-	db.Create(&database.User_tokens{Token: generated_token, Username: username})
+	db.Create(&database.User_tokens{Token: generated_token, Uid: id})
 	expiry_seconds, err := strconv.Atoi(os.Getenv("EXPIRY_SECONDS"))
 	base.CheckErr(err)
 	c.SetCookie("user_token", generated_token, expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
-	c.SetCookie("username", username, expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
+	c.SetCookie("id", strconv.FormatUint(uint64(id), 10), expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
 	Redirect_user(generated_token, os.Getenv("EXPIRY_SECONDS"), c)
 
 }
 
-func check_login(c *gin.Context, token string, username string) (bool, string, string) {
+func check_login(c *gin.Context, token string, id uint) (bool, string, string) {
 
 	db := database.OpenDB()
 	var user_token database.User_tokens
-	db.Find(&user_token, "token = ? AND username = ?", token, username)
+	db.Find(&user_token, "token = ? AND uid = ?", token, id)
 
 	expiry_seconds, err := strconv.Atoi(os.Getenv("EXPIRY_SECONDS"))
 	base.CheckErr(err)
@@ -204,8 +214,8 @@ func check_login(c *gin.Context, token string, username string) (bool, string, s
 }
 
 func Forgot_password(c *gin.Context) {
-	cookie, username := get_cookies(c)
-	logged_in, token, expire_seconds := check_login(c, cookie, username)
+	cookie, id := get_cookies(c)
+	logged_in, token, expire_seconds := check_login(c, cookie, id)
 	if logged_in {
 		Redirect_user(token, expire_seconds, c)
 
@@ -236,8 +246,8 @@ func Forgot_password_form(c *gin.Context) {
 	var user database.User
 	result := db.Find(&user, "email = ?", email_input)
 
-	if os.Getenv("EMAIL") == "" || os.Getenv("EMAIL_PASSWORD") == "" {
-		log.Fatal("EMAIL or EMAIL_PASSWORD is not set")
+	if os.Getenv("EMAIL_LOGIN") == "" || os.Getenv("EMAIL_PASSWORD") == "" || os.Getenv("EMAIL_PUBLIC") == "" {
+		log.Fatal("EMAIL_LOGIN, EMAIL_PUBLIC or EMAIL_PASSWORD is not set")
 	}
 	if result.RowsAffected != 0 { // if email exists
 		code := base.GenerateSecureToken(30)
@@ -297,17 +307,59 @@ func Forgot_password_code_form(c *gin.Context) {
 
 		var user database.User
 		db.Find(&user, "email = ?", email)
-		login_user(c, user.Username)
+		login_user(c, user.Id)
 	}
 
 }
 
 func Validate_token(c *gin.Context) {
 	token := c.Param("token")
-	username := c.Param("username")
-	logged_in, _, _ := check_login(c, token, username)
+	id := c.Param("id")
+	id_str, err := strconv.ParseUint(id, 10, 32)
+	base.CheckErr(err)
+	logged_in, _, _ := check_login(c, token, uint(id_str))
 	c.JSON(http.StatusOK, gin.H{
 		"valid": logged_in,
 	})
+
+}
+func Delete_account(c *gin.Context) {
+	c.HTML(http.StatusOK, "delete_account.tmpl", gin.H{})
+
+}
+
+func Delete_account_form(c *gin.Context) {
+	db := database.OpenDB()
+
+	user_identifier := c.PostForm("user_identifier")
+	password := c.PostForm("password")
+	var user database.User
+	var id_type string
+	if strings.Contains(user_identifier, "@") {
+		db.Find(&user, "email = ?", user_identifier)
+		id_type = "email"
+	} else {
+		db.Find(&user, "username = ?", user_identifier)
+		id_type = "username"
+	}
+
+	if user.Username == "" { // user doesnt exist
+		c.HTML(http.StatusOK, "login.tmpl", gin.H{
+			"error": fmt.Sprintf("No user with %s: %s", id_type, user_identifier),
+		})
+		return
+
+	}
+	if base.CheckPasswordHash(password, user.Password) {
+		db.Delete(&user)
+		var user_token database.User_tokens
+		db.Delete(&user_token, "uid = ?", user.Id)
+
+	} else {
+		c.HTML(http.StatusOK, "login.tmpl", gin.H{
+			"error": "Wrong credentials.",
+		})
+	}
+	c.Redirect(http.StatusFound, "/")
 
 }

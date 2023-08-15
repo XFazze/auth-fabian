@@ -2,19 +2,20 @@
 <div>
     <p>Account service made by Fabian.</p>
     <div class="checkout">
-        <p>More services can be found at <a href="fabianoden.com"> Fabianoden.com</a></p>
+        <p>More services can be found at <a href="https://fabianoden.com"> Fabianoden.com</a></p>
 
     </div>
 
     <div class="stacked-divs">
         {{if .logged_in}}
 
-        <h3>You are logged in</h3>
+        <h3>You are logged in as {{ .username}}</h3>
         <a href="/logout">Logout</a>
+        <a href="/delete_account">Delete account</a>
         {{else}}
         <h3>You are not logged in</h3>
         <a href="/login">Login</a>
         <a href="/signup">Signup</a>
-        <!-- <a href="/forgot_password">Forgot Password</a> -->
+        <a href="/forgot_password">Forgot Password</a>
         {{end}}
     </div>

@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
+	Id       uint
 	Username string
 	Email    string
 	Password string
@@ -11,8 +12,8 @@ type User struct {
 
 type User_tokens struct {
 	gorm.Model
-	Token    string
-	Username string
+	Token string
+	Uid   uint
 }
 
 type Forgot_password_code struct {

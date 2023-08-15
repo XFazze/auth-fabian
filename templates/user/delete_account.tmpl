@@ -1,17 +1,21 @@
 {{template "meta.tmpl"}}
 <div>
-    <h3>Login</h3>
+    <h3>Delete Account</h3>
 </div>
 <div>
+    {{ if .deleted }}
+    <h3>Successfully deleted account</h3>
+    {{ else }}
     <form method="post" autocomplete="on">
         {{template "user_identifier.tmpl"}}
-        {{template "password_field.tmpl" }}
+        {{template "password_field.tmpl"}}
         <input type="submit">
 
     </form>
     {{.error}}
+    {{end}}
 </div>
 <div class="stacked-divs">
+    <a href="/login">Login</a>
     <a href="/signup">Signup</a>
-    <a href="/forgot_password">Forgot password?</a>
 </div>

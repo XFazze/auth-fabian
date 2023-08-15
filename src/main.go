@@ -41,6 +41,9 @@ func main() {
 	r.GET("/forgot_password/:email/:code", routes.Forgot_password_change)
 	r.POST("/forgot_password/:email/:code", routes.Forgot_password_code_form)
 
+	r.GET("/delete_account", routes.Delete_account)
+	r.POST("/delete_account", routes.Delete_account_form)
+
 	r.GET("/validate_token/:token", routes.Validate_token)
 
 	r.Run()

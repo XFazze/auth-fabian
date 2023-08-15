@@ -11,12 +11,12 @@ import (
 
 func Send_mail(to, subject, html string) {
 	e := email.NewEmail()
-	e.From = fmt.Sprintf("Auth fabian suppoer <%s>", os.Getenv("EMAIL"))
+	e.From = fmt.Sprintf("Auth fabian Support <%s>", os.Getenv("EMAIL_PUBLIC"))
 	e.To = []string{to}
 	e.Subject = subject
 	e.HTML = []byte(html)
-	fmt.Println(os.Getenv("EMAIL"), os.Getenv("EMAIL_PASSWORD"))
-	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", os.Getenv("EMAIL"), os.Getenv("EMAIL_PASSWORD"), "smtp.gmail.com"))
+	fmt.Println(os.Getenv("EMAIL_LOGIN"), os.Getenv("EMAIL_PASSWORD"))
+	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", os.Getenv("EMAIL_LOGIN"), os.Getenv("EMAIL_PASSWORD"), "smtp.gmail.com"))
 	base.CheckErr(err)
 
 }
