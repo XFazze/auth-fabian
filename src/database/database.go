@@ -15,16 +15,16 @@ func Setup_migrate_db() {
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Println("database does not exist")
 		file, err := os.Create(os.Getenv("DATABASE_FILE")) // FIXME does not create instant?
-		base.CheckErr(err)
+		base.Check_err(err)
 		file.Close()
 	}
 
-	db := OpenDB()
+	db := Open_DB()
 	db.AutoMigrate(&User{}, &User_tokens{}, &Forgot_password_code{})
 }
 
-func OpenDB() *gorm.DB {
+func Open_DB() *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DATABASE_FILE")), &gorm.Config{})
-	base.CheckErr(err)
+	base.Check_err(err)
 	return db
 }

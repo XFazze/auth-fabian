@@ -49,19 +49,3 @@ func main() {
 	r.Run()
 
 }
-
-/*
-func login(username_mail, passwd string) {
-	db, err := sql.Open("sqlite3", file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if strings.Contains(username_mail, "@") {
-		db.Exec(create)
-	}
-	if err != nil {
-		fmt.Println(err)
-	}
-
-}
-*/

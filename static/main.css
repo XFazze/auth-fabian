@@ -1,8 +1,4 @@
 /*
-! tailwindcss v3.1.7 | MIT License | https://tailwindcss.com
-*/
-
-/*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
 2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
 */
@@ -84,20 +80,6 @@ abbr:where([title]) {
 }
 
 /*
-Remove the default font size and weight for headings.
-*/
-
-/* h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-size: inherit;
-  font-weight: inherit;
-} */
-
-/*
 Reset links to optimize for opt-in styling instead of opt-out.
 */
 
@@ -113,21 +95,6 @@ Add the correct font weight in Edge and Safari.
 b,
 strong {
   font-weight: bolder;
-}
-
-/*
-1. Use the user's configured `mono` font family by default.
-2. Correct the odd `em` font sizing in all browsers.
-*/
-
-code,
-kbd,
-samp,
-pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  /* 1 */
-  font-size: 1em;
-  /* 2 */
 }
 
 /*
@@ -210,23 +177,6 @@ select {
 }
 
 /*
-1. Correct the inability to style clickable types in iOS and Safari.
-2. Remove default button styles.
-*/
-
-button,
-[type='button'],
-[type='reset'],
-[type='submit'] {
-  -webkit-appearance: button;
-  /* 1 */
-  background-color: transparent;
-  /* 2 */
-  background-image: none;
-  /* 2 */
-}
-
-/*
 Use the modern Firefox focus style for all focusable elements.
 */
 
@@ -280,18 +230,6 @@ Remove the inner padding in Chrome and Safari on macOS.
 }
 
 /*
-1. Correct the inability to style clickable types in iOS and Safari.
-2. Change font properties to `inherit` in Safari.
-*/
-
-::-webkit-file-upload-button {
-  -webkit-appearance: button;
-  /* 1 */
-  font: inherit;
-  /* 2 */
-}
-
-/*
 Add the correct display in Chrome and Safari.
 */
 
@@ -342,35 +280,6 @@ Prevent resizing textareas horizontally by default.
 
 textarea {
   resize: vertical;
-}
-
-/*
-1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
-2. Set the default placeholder color to the user's configured gray 400 color.
-*/
-
-input::-moz-placeholder,
-textarea::-moz-placeholder {
-  opacity: 1;
-  /* 1 */
-  color: #9ca3af;
-  /* 2 */
-}
-
-input:-ms-input-placeholder,
-textarea:-ms-input-placeholder {
-  opacity: 1;
-  /* 1 */
-  color: #9ca3af;
-  /* 2 */
-}
-
-input::placeholder,
-textarea::placeholder {
-  opacity: 1;
-  /* 1 */
-  color: #9ca3af;
-  /* 2 */
 }
 
 /*

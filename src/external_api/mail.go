@@ -17,6 +17,6 @@ func Send_mail(to, subject, html string) {
 	e.HTML = []byte(html)
 	fmt.Println(os.Getenv("EMAIL_LOGIN"), os.Getenv("EMAIL_PASSWORD"))
 	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", os.Getenv("EMAIL_LOGIN"), os.Getenv("EMAIL_PASSWORD"), "smtp.gmail.com"))
-	base.CheckErr(err)
+	base.Check_err(err)
 
 }
