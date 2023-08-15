@@ -48,7 +48,7 @@ func Index(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{"logged_in": logged_in, "username": user.Username})
 }
 
-func Redirect_user(token string, expire_seconds string, c *gin.Context) {
+func Redirect_user(token string, expire_seconds string, id uint, c *gin.Context) {
 	redirect_url := c.DefaultQuery("redirect", "/")
 	if redirect_url == "/" {
 		c.Redirect(http.StatusFound, "/")
@@ -58,6 +58,7 @@ func Redirect_user(token string, expire_seconds string, c *gin.Context) {
 	params := url.Values{}
 	params.Set("token", token)
 	params.Set("expire_seconds", expire_seconds)
+	params.Set("id", strconv.FormatUint(uint64(id), 10))
 	location, err := url.Parse(redirect_url)
 	base.CheckErr(err)
 	if location.Host == "" {
@@ -75,10 +76,10 @@ func Redirect_user(token string, expire_seconds string, c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	cookie, username := get_cookies(c)
-	logged_in, token, expire_seconds := check_login(c, cookie, username)
+	cookie, id := get_cookies(c)
+	logged_in, token, expire_seconds := check_login(c, cookie, id)
 	if logged_in {
-		Redirect_user(token, expire_seconds, c)
+		Redirect_user(token, expire_seconds, id, c)
 
 	} else {
 		c.HTML(http.StatusOK, "login.tmpl", gin.H{})
@@ -123,10 +124,10 @@ func Logout(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 func Signup(c *gin.Context) {
-	cookie, username := get_cookies(c)
-	logged_in, token, expire_seconds := check_login(c, cookie, username)
+	cookie, id := get_cookies(c)
+	logged_in, token, expire_seconds := check_login(c, cookie, id)
 	if logged_in {
-		Redirect_user(token, expire_seconds, c)
+		Redirect_user(token, expire_seconds, id, c)
 
 	} else {
 		c.HTML(http.StatusOK, "signup.tmpl", gin.H{})
@@ -193,7 +194,7 @@ func login_user(c *gin.Context, id uint) {
 	base.CheckErr(err)
 	c.SetCookie("user_token", generated_token, expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
 	c.SetCookie("id", strconv.FormatUint(uint64(id), 10), expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
-	Redirect_user(generated_token, os.Getenv("EXPIRY_SECONDS"), c)
+	Redirect_user(generated_token, os.Getenv("EXPIRY_SECONDS"), id, c)
 
 }
 
@@ -217,7 +218,7 @@ func Forgot_password(c *gin.Context) {
 	cookie, id := get_cookies(c)
 	logged_in, token, expire_seconds := check_login(c, cookie, id)
 	if logged_in {
-		Redirect_user(token, expire_seconds, c)
+		Redirect_user(token, expire_seconds, id, c)
 
 	} else {
 		c.HTML(http.StatusOK, "forgot_password.tmpl", gin.H{})
@@ -318,8 +319,13 @@ func Validate_token(c *gin.Context) {
 	id_str, err := strconv.ParseUint(id, 10, 32)
 	base.CheckErr(err)
 	logged_in, _, _ := check_login(c, token, uint(id_str))
+	db := database.OpenDB()
+	var user database.User
+	db.Find(&user, "id = ?", id)
+
 	c.JSON(http.StatusOK, gin.H{
-		"valid": logged_in,
+		"valid":    logged_in,
+		"username": user.Username,
 	})
 
 }
