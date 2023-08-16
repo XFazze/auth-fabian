@@ -119,8 +119,8 @@ func Login_form(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	c.SetCookie("id", "", -1, "/", os.Getenv("DOMAIN"), true, true)
-	c.SetCookie("username", "", -1, "/", os.Getenv("DOMAIN"), true, true)
+	c.SetCookie("id", "", -1, "/",  c.Request.Host, true, true)
+	c.SetCookie("username", "", -1, "/",  c.Request.Host, true, true)
 	c.Redirect(http.StatusFound, "/")
 }
 func Signup(c *gin.Context) {
@@ -192,8 +192,8 @@ func login_user(c *gin.Context, id uint) {
 	db.Create(&database.User_tokens{Token: generated_token, Uid: id})
 	expiry_seconds, err := strconv.Atoi(os.Getenv("EXPIRY_SECONDS"))
 	base.Check_err(err)
-	c.SetCookie("user_token", generated_token, expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
-	c.SetCookie("id", strconv.FormatUint(uint64(id), 10), expiry_seconds, "/", os.Getenv("DOMAIN"), true, true)
+	c.SetCookie("user_token", generated_token, expiry_seconds, "/",  c.Request.Host, true, true)
+	c.SetCookie("id", strconv.FormatUint(uint64(id), 10), expiry_seconds, "/",  c.Request.Host, true, true)
 	Redirect_user(generated_token, os.Getenv("EXPIRY_SECONDS"), id, c)
 
 }
