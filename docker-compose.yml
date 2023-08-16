@@ -6,6 +6,6 @@ services:
       - "8082:8080"
     restart: unless-stopped
     volumes:
-    - ./data:/app/data
+      - ./data:/app/data
     environment:
       - GIN_MODE=release

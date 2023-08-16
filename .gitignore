@@ -20,11 +20,8 @@ vendor/
 # Go workspace file
 go.work
 
-# Tailwindcss binary
-tailwindcss
-
 # Database
-app.db
+data/
 
 # Secrets
 .env_secrets

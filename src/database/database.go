@@ -11,12 +11,15 @@ import (
 )
 
 func Setup_migrate_db() {
-	_, err := os.Stat(os.Getenv("DATABASE_FILE"))
+	_, err := os.Stat(os.Getenv("DATABASE_DIR") + os.Getenv("DATABASE_FILE"))
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Println("database does not exist")
-		file, err := os.Create(os.Getenv("DATABASE_FILE")) // FIXME does not create instant?
+		err := os.MkdirAll(os.Getenv("DATABASE_DIR"), os.ModePerm)
+		base.Check_err(err)
+		file, err := os.Create(os.Getenv("DATABASE_DIR") + os.Getenv("DATABASE_FILE"))
 		base.Check_err(err)
 		file.Close()
+		fmt.Println("Created database")
 	}
 
 	db := Open_DB()
@@ -24,7 +27,7 @@ func Setup_migrate_db() {
 }
 
 func Open_DB() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DATABASE_FILE")), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DATABASE_DIR")+os.Getenv("DATABASE_FILE")), &gorm.Config{})
 	base.Check_err(err)
 	return db
 }
